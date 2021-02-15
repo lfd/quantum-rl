@@ -8,6 +8,7 @@ authors = ["Lucas Wolf <iamlucaswolf@gmail.com>"]
 python = "^3.8"
 gym = "^0.18.0"
 tensorflow = "^2.4.1"
+PennyLane = "^0.14.0"
 
 [tool.poetry.dev-dependencies]
 

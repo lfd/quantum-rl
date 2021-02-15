@@ -70,22 +70,32 @@ class DQN:
                 continue
 
             if train_step % train_every == 0:
+                
+                # Sample a batch of transitions from the replay buffer
                 batch = self.memory.sample(batch_size)
 
-                target_next_q_values = self.target_model(batch.next_states)
-                target_next_v_values = tf.reduce_max(
-                    target_next_q_values, 
-                    axis=-1
-                )
+                # Convert target to correct datatype (PennyLane requires 64bit
+                # floats, Cirq/TFQ works with standard 32bit)
+                targets = tf.cast(batch.rewards, tf.keras.backend.floatx())
 
-                non_terminal_indices = tf.where(~batch.is_terminal)
+                # Check whether the batch contains next_states (the sampled
+                # batch might contain terminal states only)
+                if len(batch.next_states) > 0:
 
-                targets = tf.cast(batch.rewards, target_next_v_values.dtype)
-                targets = tf.tensor_scatter_nd_add(
-                    targets,
-                    non_terminal_indices,
-                    self.gamma * target_next_v_values
-                )
+                    target_next_q_values = self.target_model(batch.next_states)
+                    target_next_v_values = tf.reduce_max(
+                        target_next_q_values, 
+                        axis=-1
+                    )
+
+                    non_terminal_indices = tf.where(~batch.is_terminal)
+
+                    targets = tf.cast(batch.rewards, target_next_v_values.dtype)
+                    targets = tf.tensor_scatter_nd_add(
+                        targets,
+                        non_terminal_indices,
+                        self.gamma * target_next_v_values
+                    )
 
                 with tf.GradientTape() as tape:
                     policy_q_values = self.policy_model(batch.states)
