@@ -59,6 +59,15 @@ class Scale(keras.layers.Layer):
         return self.factor * inputs
 
 
+class ConstantScale(keras.layers.Layer):
+
+    def __init__(self, factor, name=None):
+        super(ConstantScale, self).__init__(name=name)
+        self.factor = factor
+
+    def call(self, inputs):
+        return self.factor * inputs
+
 class ExpScale(keras.layers.Layer):
 
     def __init__(self, name=None):
