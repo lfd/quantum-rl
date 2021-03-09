@@ -10,6 +10,15 @@ if __name__ == '__main__':
     if len(sys.argv) != 2:
         sys.exit('Usage: python train.py <path-to-config>')
 
+
+    ### EXPERIMENTAL: Restrict GPU memroy for Tensorflow
+    gpus = tf.config.list_physical_devices('GPU')
+    if gpus:
+        tf.config.experimental.set_virtual_device_configuration(
+            gpus[0],
+            [tf.config.experimental.VirtualDeviceConfiguration(memory_limit=5120)]
+        )
+
     config_name = sys.argv[1]
     config = importlib.import_module(f'configs.{config_name}')
 
