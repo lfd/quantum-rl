@@ -1,0 +1,3 @@
+tensorflow==2.4.1
+gym==0.18.0
+pennylane==0.14.1
