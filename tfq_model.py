@@ -9,7 +9,7 @@ import sympy
 # VQC as Keras Model (with tfq)
 class QVC_Model(keras.Model):
 
-    def __init__(self,  num_qubits, num_layers, nonlinearity=None):
+    def __init__(self,  num_qubits, num_layers, nonlinearity=None, scale=None):
         super(QVC_Model, self).__init__()
 
         self.qubits = cirq.GridQubit.rect(1, num_qubits)
@@ -19,10 +19,14 @@ class QVC_Model(keras.Model):
 
         self.vqc = tfq.layers.PQC(circuit, readout_op)
 
+        self.scale = scale
+
         
     def call(self, inputs, trainig=False):
         x = [ self.encode_data(input, asTensor=True) for input in inputs ]
         x = tf.concat([self.vqc(i) for i in x], axis=0)
+        if(self.scale is not None):
+            x = self.scale(x)
         return x
         
 
@@ -105,8 +109,8 @@ class QVC_Model(keras.Model):
 
 # full parameterized QVC as in reference implementation (https://github.com/lockwo/quantum_computation)
 class QVC_Model_full_parameterized(QVC_Model):
-    def __init__(self,  num_qubits, num_layers, nonlinearity=None):
-        super(QVC_Model_full_parameterized, self).__init__(num_qubits, num_layers, nonlinearity)
+    def __init__(self,  num_qubits, num_layers, nonlinearity=None, scale=None):
+        super(QVC_Model_full_parameterized, self).__init__(num_qubits, num_layers, nonlinearity, scale)
 
 
     def create_circuit(self, num_qubits, num_layers):
@@ -163,3 +167,4 @@ class QVC_Model_full_parameterized(QVC_Model):
                         cirq.ry(-symbols[7]).on(sink), 
                         cirq.rz(-symbols[8]).on(sink)])
         return circuit
+
