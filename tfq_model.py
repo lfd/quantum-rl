@@ -33,15 +33,17 @@ class QVC_Model(keras.Model):
     def create_circuit(self, num_qubits, num_layers):
         circuit = cirq.Circuit()
 
-        symbols = sympy.symbols('param0:' + str(num_qubits*num_layers + 2*2*3 )) # qubits * layers + 2 * 2 * 3 pooling
+        weight_symbols = sympy.symbols('weights0:' + str(num_qubits*num_layers))
 
         for idx in range(num_layers):
-            circuit += self.vqc_layer(symbols=symbols[idx*num_qubits : (idx+1)*num_qubits])
+            circuit += self.vqc_layer(symbols=weight_symbols[idx*num_qubits : (idx+1)*num_qubits])
+
+        pool_symbols = sympy.symbols('pool0:' + str(2*2*3))
 
         circuit += self.pool(source=self.qubits[0], sink=self.qubits[2], 
-                            symbols=symbols[num_qubits*num_layers : num_qubits*num_layers+6])
+                            symbols=pool_symbols[:6])
         circuit += self.pool(source=self.qubits[1], sink=self.qubits[3], 
-                            symbols=symbols[num_qubits*num_layers+6 : ])
+                            symbols=pool_symbols[6:])
 
         return circuit
 
@@ -116,15 +118,17 @@ class QVC_Model_full_parameterized(QVC_Model):
     def create_circuit(self, num_qubits, num_layers):
         circuit = cirq.Circuit()
 
-        symbols = sympy.symbols('param0:' + str(num_qubits*num_layers*3 + 2*3*3)) # qubits * layers * 3 weights + 2 * 3 * 3 pooling
+        weight_symbols = sympy.symbols('weights0:' + str(num_qubits*num_layers * 3))
 
         for idx in range(num_layers):
-            circuit += self.vqc_layer(symbols=symbols[idx*num_qubits*3 : (idx+1)*num_qubits*3])
+            circuit += self.vqc_layer(symbols=weight_symbols[idx*num_qubits*3 : (idx+1)*num_qubits*3])
+
+        pool_symbols = sympy.symbols('pool0:' + str(2*3*3))
 
         circuit += self.pool(source=self.qubits[0], sink=self.qubits[2], 
-                            symbols=symbols[num_qubits*num_layers*3 : num_qubits*num_layers*3+9])
+                            symbols=pool_symbols[:9])
         circuit += self.pool(source=self.qubits[1], sink=self.qubits[3], 
-                            symbols=symbols[num_qubits*num_layers*3+9 : ])
+                            symbols=pool_symbols[9:])
         return circuit
 
 

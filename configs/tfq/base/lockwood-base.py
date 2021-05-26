@@ -1,22 +1,22 @@
 # configs/cartpole-dnn.py
 
-from wrappers import CartPoleEncoding, ToDoubleTensor
+from wrappers import CartPoleEncoding, ToDoubleTensorFloat32
 
 from tfq_model import QVC_Model
 import gym
 from tensorflow import keras
 
-# Setup Keras to use 64-bit floats (not required, but supresses warnings)
-keras.backend.set_floatx('float64')
+# Setup Keras to use 32-bit floats
+keras.backend.set_floatx('float32')
 
 ## Environment
 env = gym.make('CartPole-v0')
 env = CartPoleEncoding(env)
-env = ToDoubleTensor(env)
+env = ToDoubleTensorFloat32(env)
 
 val_env = gym.make('CartPole-v0')
 val_env = CartPoleEncoding(val_env)
-val_env = ToDoubleTensor(val_env)
+val_env = ToDoubleTensorFloat32(val_env)
 
 ## Model
 policy_model = QVC_Model(num_qubits=4, num_layers=3)
