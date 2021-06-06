@@ -15,12 +15,14 @@ class QVC_Model(keras.Model):
         self.qubits = cirq.GridQubit.rect(1, num_qubits)
         
         circuit = self.create_circuit(num_qubits, num_layers)
-        readout_op = [cirq.Z(self.qubits[i]) for i in (2,3)]
+        readout_op = self.build_readout_op()
 
         self.vqc = tfq.layers.PQC(circuit, readout_op)
 
         self.scale = scale
 
+    def build_readout_op(self):
+        return [cirq.Z(self.qubits[i]) for i in (2,3)]
         
     def call(self, inputs, trainig=False):
         x = [ self.encode_data(input, asTensor=True) for input in inputs ]
