@@ -2,7 +2,7 @@
 
 from wrappers import BlackjackEncoding, ToDoubleTensorFloat32
 
-from blackjack_model import VQC_Model_Blackjack_full_param
+from tfq_models.blackjack_model import VQC_Model_Blackjack_full_param
 import gym
 from tensorflow import keras
 

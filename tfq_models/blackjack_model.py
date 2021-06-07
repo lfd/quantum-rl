@@ -1,6 +1,6 @@
 import cirq
 import sympy
-from tfq_model import QVC_Model, QVC_Model_full_parameterized
+from tfq_models.cartpole_model import QVC_Model, QVC_Model_full_parameterized
 
 class VQC_Model_Blackjack(QVC_Model):
 

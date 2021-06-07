@@ -2,7 +2,7 @@
 
 from wrappers import CartPoleEncoding, ToDoubleTensorFloat32
 
-from tfq_model import QVC_Model_full_parameterized
+from tfq_models.cartpole_model import QVC_Model_full_parameterized
 import gym
 from tensorflow import keras
 
