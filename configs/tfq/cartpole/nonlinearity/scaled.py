@@ -2,7 +2,7 @@
 
 from wrappers import CartPoleEncoding, ToDoubleTensorFloat32
 
-from tfq_models.cartpole_model import QVC_Model
+from tfq_models.cartpole_model import Small_Cartpole_Model
 import gym
 from tensorflow import keras
 from models import Scale
@@ -20,8 +20,8 @@ val_env = CartPoleEncoding(val_env)
 val_env = ToDoubleTensorFloat32(val_env)
 
 ## Model
-policy_model = QVC_Model(num_qubits=4, num_layers=3, scale=Scale(name="scale"))
-target_model = QVC_Model(num_qubits=4, num_layers=3, scale=Scale(name="scale"))
+policy_model = Small_Cartpole_Model(num_qubits=4, num_layers=3, activation='sigmoid', scale=Scale(name="scale"))
+target_model = Small_Cartpole_Model(num_qubits=4, num_layers=3, activation='sigmoid', scale=Scale(name="scale"))
 target_model.set_weights(policy_model.get_weights())
 
 ## Optimization

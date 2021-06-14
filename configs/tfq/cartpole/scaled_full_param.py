@@ -2,9 +2,10 @@
 
 from wrappers import CartPoleEncoding, ToDoubleTensorFloat32
 
-from tfq_models.cartpole_model import QVC_Model
+from tfq_models.cartpole_model import Full_Param_Cartpole_Model
 import gym
 from tensorflow import keras
+from models import Scale
 
 # Setup Keras to use 32-bit floats
 keras.backend.set_floatx('float32')
@@ -19,8 +20,8 @@ val_env = CartPoleEncoding(val_env)
 val_env = ToDoubleTensorFloat32(val_env)
 
 ## Model
-policy_model = QVC_Model(num_qubits=4, num_layers=3)
-target_model = QVC_Model(num_qubits=4, num_layers=3)
+policy_model = Full_Param_Cartpole_Model(num_qubits=4, num_layers=3, scale=Scale(name="scale"))
+target_model = Full_Param_Cartpole_Model(num_qubits=4, num_layers=3, scale=Scale(name="scale"))
 target_model.set_weights(policy_model.get_weights())
 
 ## Optimization
@@ -40,3 +41,4 @@ num_val_steps = 5000
 epsilon_start = 1.0
 epsilon_end = 0.01
 epsilon_duration = 20000
+

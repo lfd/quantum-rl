@@ -2,7 +2,7 @@
 
 from wrappers import BlackjackEncoding, ToDoubleTensorFloat32
 
-from tfq_models.blackjack_model import VQC_Model_Blackjack_full_param
+from tfq_models.blackjack_model import Full_Param_Blackjack_Model
 import gym
 from tensorflow import keras
 
@@ -19,8 +19,8 @@ val_env = BlackjackEncoding(val_env)
 val_env = ToDoubleTensorFloat32(val_env)
 
 ## Model
-policy_model = VQC_Model_Blackjack_full_param(num_qubits=4, num_layers=3)
-target_model = VQC_Model_Blackjack_full_param(num_qubits=4, num_layers=3)
+policy_model = Full_Param_Blackjack_Model(num_qubits=4, num_layers=3)
+target_model = Full_Param_Blackjack_Model(num_qubits=4, num_layers=3)
 target_model.set_weights(policy_model.get_weights())
 
 ## Optimization

@@ -1,26 +1,27 @@
-# configs/blackjack-dnn.py
+# configs/cartpole-dnn.py
 
-from wrappers import BlackjackEncoding, ToDoubleTensorFloat32
+from wrappers import CartPoleEncoding, ToDoubleTensorFloat32
 
-from tfq_models.blackjack_model import Small_Blackjack_Model
+from tfq_models.cartpole_model import Small_Cartpole_Model
 import gym
 from tensorflow import keras
+from models import Scale
 
 # Setup Keras to use 32-bit floats
 keras.backend.set_floatx('float32')
 
 ## Environment
-env = gym.make('Blackjack-v0')
-env = BlackjackEncoding(env)
+env = gym.make('CartPole-v0')
+env = CartPoleEncoding(env)
 env = ToDoubleTensorFloat32(env)
 
-val_env = gym.make('Blackjack-v0')
-val_env = BlackjackEncoding(val_env)
+val_env = gym.make('CartPole-v0')
+val_env = CartPoleEncoding(val_env)
 val_env = ToDoubleTensorFloat32(val_env)
 
 ## Model
-policy_model = Small_Blackjack_Model(num_qubits=3, num_layers=3)
-target_model = Small_Blackjack_Model(num_qubits=3, num_layers=3)
+policy_model = Small_Cartpole_Model(num_qubits=4, num_layers=3, scale=Scale(name="scale"))
+target_model = Small_Cartpole_Model(num_qubits=4, num_layers=3, scale=Scale(name="scale"))
 target_model.set_weights(policy_model.get_weights())
 
 ## Optimization
@@ -40,3 +41,4 @@ num_val_steps = 5000
 epsilon_start = 1.0
 epsilon_end = 0.01
 epsilon_duration = 20000
+

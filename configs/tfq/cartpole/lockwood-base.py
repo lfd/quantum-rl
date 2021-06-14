@@ -1,8 +1,8 @@
-# configs/blackjack-dnn.py
+# configs/cartpole-dnn.py
 
-from wrappers import BlackjackEncoding, ToDoubleTensorFloat32
+from wrappers import CartPoleEncoding, ToDoubleTensorFloat32
 
-from tfq_models.blackjack_model import Small_Blackjack_Model
+from tfq_models.cartpole_model import Small_Cartpole_Model
 import gym
 from tensorflow import keras
 
@@ -10,17 +10,17 @@ from tensorflow import keras
 keras.backend.set_floatx('float32')
 
 ## Environment
-env = gym.make('Blackjack-v0')
-env = BlackjackEncoding(env)
+env = gym.make('CartPole-v0')
+env = CartPoleEncoding(env)
 env = ToDoubleTensorFloat32(env)
 
-val_env = gym.make('Blackjack-v0')
-val_env = BlackjackEncoding(val_env)
+val_env = gym.make('CartPole-v0')
+val_env = CartPoleEncoding(val_env)
 val_env = ToDoubleTensorFloat32(val_env)
 
 ## Model
-policy_model = Small_Blackjack_Model(num_qubits=3, num_layers=3)
-target_model = Small_Blackjack_Model(num_qubits=3, num_layers=3)
+policy_model = Small_Cartpole_Model(num_qubits=4, num_layers=3)
+target_model = Small_Cartpole_Model(num_qubits=4, num_layers=3)
 target_model.set_weights(policy_model.get_weights())
 
 ## Optimization
