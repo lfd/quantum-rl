@@ -9,7 +9,7 @@ import sympy
 # VQC as Keras Model
 class VQC_Model(keras.Model, ABC):
 
-    def __init__(self,  num_qubits, num_layers, activation='linear', scale=None):
+    def __init__(self,  num_qubits, num_layers, activation='linear', scale=None, pooling='v1'):
         super(VQC_Model, self).__init__()
 
         circuit = cirq.Circuit()
@@ -18,6 +18,8 @@ class VQC_Model(keras.Model, ABC):
         self.num_layers = num_layers
         self.qubits = cirq.GridQubit.rect(1, self.num_qubits)
         self.activation=keras.layers.Activation(activation)
+
+        self.pooling = pooling
 
         circuit += self.create_circuit()
         circuit += self.build_pooling_layer()
@@ -50,8 +52,9 @@ class VQC_Model(keras.Model, ABC):
     def reparameterize(self, weights):
         return self.activation(weights) * 2. * np.pi
 
-    # using pooling as in reference implementation
-    def pool(self, source, sink, symbols):
+    
+    # Base pooling
+    def _pool(self, source, sink, symbols):
         circuit = cirq.Circuit()
 
         circuit.append([cirq.rx(symbols[0]).on(source), 
@@ -64,9 +67,32 @@ class VQC_Model(keras.Model, ABC):
 
         circuit.append(cirq.CNOT(control=source, target=sink))
 
+        return circuit
+
+    # using pooling as in reference implementation
+    # Uses 6 symbols
+    def pool_v1(self, source, sink, symbols):
+        circuit = cirq.Circuit()
+
+        circuit += self._pool(source, sink, symbols)
+
         circuit.append([cirq.rx(-symbols[0]).on(sink), 
                         cirq.ry(-symbols[1]).on(sink), 
                         cirq.rz(-symbols[2]).on(sink)])
+
+        return circuit
+
+    # pooling approach using 9 parameters
+    # Use different parameters for last sink rotation
+    def pool_v2(self, source, sink, symbols):
+        circuit = cirq.Circuit()
+
+        circuit += self._pool(source, sink, symbols[:6])
+
+        circuit.append([cirq.rx(-symbols[6]).on(sink), 
+                        cirq.ry(-symbols[7]).on(sink), 
+                        cirq.rz(-symbols[8]).on(sink)])
+
         return circuit
 
     @abstractmethod
@@ -88,8 +114,8 @@ class VQC_Model(keras.Model, ABC):
 
 # VQC as described in Lockwood/Si Paper (20 Parameters)
 class Small_VQC_Model(VQC_Model, ABC):
-    def __init__(self, num_qubits, num_layers, activation='linear', scale=None):
-        super(Small_VQC_Model, self).__init__(num_qubits, num_layers, activation, scale)
+    def __init__(self, num_qubits, num_layers, activation='linear', scale=None, pooling='v1'):
+        super(Small_VQC_Model, self).__init__(num_qubits, num_layers, activation, scale, pooling)
 
     def create_circuit(self):
         circuit = cirq.Circuit()
@@ -122,8 +148,8 @@ class Small_VQC_Model(VQC_Model, ABC):
 
 # full parameterized VQC as in reference implementation (https://github.com/lockwo/quantum_computation)
 class Full_Param_VQC_Model(VQC_Model, ABC):
-    def __init__(self, num_qubits, num_layers, activation='linear', scale=None):
-        super(Full_Param_VQC_Model, self).__init__(num_qubits, num_layers, activation, scale)
+    def __init__(self, num_qubits, num_layers, activation='linear', scale=None, pooling='v1'):
+        super(Full_Param_VQC_Model, self).__init__(num_qubits, num_layers, activation, scale, pooling)
 
     def create_circuit(self):
         circuit = cirq.Circuit()
