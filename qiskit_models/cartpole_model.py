@@ -1,19 +1,8 @@
 from abc import ABC
 import numpy as np
-from qiskit.circuit import QuantumCircuit
-from qiskit.opflow.operator_globals import Z, I
-from qiskit import Aer
 from qiskit_models.base_model import Small_VQC_Model, Full_Param_VQC_Model, VQC_Model
 
 class Cartpole_Model(VQC_Model, ABC):
-    def __init__(self, num_qubits, 
-        num_layers, 
-        activation='linear', 
-        scale=None, 
-        pooling='v1',
-        device=Aer.get_backend('qasm_simulator'),
-        shots=10):
-        super(Cartpole_Model, self).__init__(num_qubits, num_layers, activation, scale, pooling, device, shots)
 
     def build_readout_op(self):
         self.circuit.measure(2,0)
@@ -41,25 +30,10 @@ class Cartpole_Model(VQC_Model, ABC):
         return np.transpose([x[:,2]+x[:,3], x[:,1]+x[:,3]])
 
 class Small_Cartpole_Model(Small_VQC_Model, Cartpole_Model):
-    def __init__(self, num_qubits, 
-        num_layers, 
-        activation='linear', 
-        scale=None, 
-        pooling='v1',
-        device=Aer.get_backend('qasm_simulator'),
-        shots=10):
-        super(Small_Cartpole_Model, self).__init__(num_qubits, num_layers, activation, scale, pooling, device, shots)
+    pass
 
 
 class Full_Param_Cartpole_Model(Full_Param_VQC_Model, Cartpole_Model):
-    def __init__(self,  
-        num_qubits, 
-        num_layers, 
-        activation='linear', 
-        scale=None, 
-        pooling='v1',
-        device=Aer.get_backend('qasm_simulator'),
-        shots=10):
-        super(Full_Param_Cartpole_Model, self).__init__(num_qubits, num_layers, activation, scale, pooling, device, shots)
+    pass
 
 

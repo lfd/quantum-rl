@@ -138,14 +138,6 @@ class VQC_Model(keras.Model, ABC):
 
 # VQC as described in Lockwood/Si Paper (20 Parameters)
 class Small_VQC_Model(VQC_Model, ABC):
-    def __init__(self, num_qubits, 
-        num_layers, 
-        activation='linear', 
-        scale=None, 
-        pooling='v1',
-        device=Aer.get_backend('qasm_simulator'),
-        shots=10):
-        super(Small_VQC_Model, self).__init__(num_qubits, num_layers, activation, scale, pooling, device, shots)
 
     def create_circuit(self):
         self.num_weights = self.num_qubits*self.num_layers
@@ -170,14 +162,6 @@ class Small_VQC_Model(VQC_Model, ABC):
 
 # full parameterized VQC as in reference implementation (https://github.com/lockwo/quantum_computation)
 class Full_Param_VQC_Model(VQC_Model, ABC):
-    def __init__(self, num_qubits, 
-        num_layers, 
-        activation='linear', 
-        scale=None, 
-        pooling='v1',
-        device=Aer.get_backend('qasm_simulator'),
-        shots=10):
-        super(Full_Param_VQC_Model, self).__init__(num_qubits, num_layers, activation, scale, pooling, device, shots)
 
     def create_circuit(self):
         self.num_weights = self.num_qubits*self.num_layers*3

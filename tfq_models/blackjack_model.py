@@ -6,8 +6,6 @@ import numpy as np
 from tfq_models.base_model import Small_VQC_Model, Full_Param_VQC_Model, VQC_Model
 
 class Blackjack_Model(VQC_Model, ABC):
-    def __init__(self,  num_qubits, num_layers, activation='linear', scale=None, pooling='v1'):
-        super(Blackjack_Model, self).__init__(num_qubits, num_layers, activation, scale, pooling)
 
     def build_readout_op(self):
         return [cirq.Z(self.qubits[i]) for i in (1,2)]
@@ -31,13 +29,9 @@ class Blackjack_Model(VQC_Model, ABC):
         return circuit
 
 class Small_Blackjack_Model(Small_VQC_Model, Blackjack_Model):
-
-    def __init__(self,  num_qubits, num_layers, activation='linear', scale=None, pooling='v1'):
-        super(Small_Blackjack_Model, self).__init__(num_qubits, num_layers, activation, scale, pooling)
+    pass
 
 
 class Full_Param_Blackjack_Model(Full_Param_VQC_Model, Blackjack_Model):
-
-    def __init__(self,  num_qubits, num_layers, activation='linear', scale=None, pooling='v1'):
-        super(Full_Param_Blackjack_Model, self).__init__(num_qubits, num_layers, activation, scale, pooling)
+    pass
 

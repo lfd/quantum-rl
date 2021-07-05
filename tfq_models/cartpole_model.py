@@ -7,8 +7,6 @@ from math import exp
 from tfq_models.base_model import Small_VQC_Model, Full_Param_VQC_Model, VQC_Model
 
 class Cartpole_Model(VQC_Model, ABC):
-    def __init__(self, num_qubits, num_layers, activation='linear', scale=None, pooling='v1'):
-        super(Cartpole_Model, self).__init__(num_qubits, num_layers, activation, scale, pooling)
 
     def build_readout_op(self):
         return [cirq.Z(self.qubits[i]) for i in (2,3)]
@@ -34,12 +32,10 @@ class Cartpole_Model(VQC_Model, ABC):
         return circuit
 
 class Small_Cartpole_Model(Small_VQC_Model, Cartpole_Model):
-    def __init__(self, num_qubits, num_layers, activation='linear', scale=None, pooling='v1'):
-        super(Small_Cartpole_Model, self).__init__(num_qubits, num_layers, activation, scale, pooling)
+    pass
 
 
 class Full_Param_Cartpole_Model(Full_Param_VQC_Model, Cartpole_Model):
-    def __init__(self,  num_qubits, num_layers, activation='linear', scale=None, pooling='v1'):
-        super(Full_Param_Cartpole_Model, self).__init__(num_qubits, num_layers, activation, scale, pooling)
+    pass
 
 
