@@ -26,7 +26,8 @@ class VQC_Model(keras.Model, ABC):
 
         readout_op = self.build_readout_op()
 
-        self.vqc = tfq.layers.ControlledPQC(circuit, readout_op)
+        self.vqc = tfq.layers.ControlledPQC(circuit, readout_op, 
+            differentiator=tfq.differentiators.ParameterShift())
 
         self.scale = scale
 
