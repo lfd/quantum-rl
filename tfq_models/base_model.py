@@ -9,8 +9,16 @@ import sympy
 # VQC as Keras Model
 class VQC_Model(keras.Model, ABC):
 
-    def __init__(self,  num_qubits, num_layers, activation='linear', scale=None, pooling='v1'):
+    def __init__(self,  num_qubits, 
+                        num_layers, 
+                        activation='linear', 
+                        scale=None, 
+                        pooling='v1', 
+                        hybrid=False):
         super(VQC_Model, self).__init__()
+        
+        if hybrid and not (pooling is None and scale is None):
+            raise ValueError("Hybrid netwok can not be initialized when pooling or scale is given.")
 
         circuit = cirq.Circuit()
 
@@ -19,21 +27,23 @@ class VQC_Model(keras.Model, ABC):
         self.qubits = cirq.GridQubit.rect(1, self.num_qubits)
         self.activation=keras.layers.Activation(activation)
 
-        self.pooling = pooling
-
         circuit += self.create_circuit()
-        circuit += self.build_pooling_layer()
 
-        readout_op = self.build_readout_op()
+        if hybrid:
+            self.scale = keras.layers.Dense(2, activation=activation) 
+            readout_op = [cirq.Z(self.qubits[i]) for i in range(num_qubits)]
+        else:
+            self.scale = scale
+            self.pooling = pooling
+            circuit += self.build_pooling_layer()
+            readout_op = self.build_readout_op()
 
         self.vqc = tfq.layers.ControlledPQC(circuit, readout_op, 
             differentiator=tfq.differentiators.ParameterShift())
 
-        self.scale = scale
-
     def call(self, inputs, trainig=False):
         x = [ self.encode_data(input, asTensor=True) for input in inputs ]
-        weights = tf.concat([self.reparameterize(self.p), self.reparameterize(self.w)], axis=1)
+        weights = self.reparameterize(self.w)
         x = tf.concat([self.vqc([i, weights]) for i in x], axis=0)
         if(self.scale is not None):
             x = self.scale(x)
