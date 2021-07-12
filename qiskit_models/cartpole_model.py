@@ -25,9 +25,12 @@ class Cartpole_Model(VQC_Model, ABC):
 
 
     # Limit Probabilities to measured qubits only and
-    # Sum probablities for measuring 1 at qubit2 [index 0] 1 at qubit3 [index 1]
+    # calculate expectation value on each qubit 
+    # Exp = p(0) - p(1)
     def _interprete_probabilities(self, x):
-        return np.transpose([x[:,2]+x[:,3], x[:,1]+x[:,3]])
+        exp_qubit2 = x[:,0]+x[:,1] - (x[:,2]+x[:,3])
+        exp_qubit3 = x[:,0]+x[:,2] - (x[:,1]+x[:,3])
+        return np.transpose([exp_qubit2, exp_qubit3])
 
 class Small_Cartpole_Model(Small_VQC_Model, Cartpole_Model):
     pass
