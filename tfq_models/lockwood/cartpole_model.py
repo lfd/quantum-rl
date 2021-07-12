@@ -4,7 +4,7 @@ import tensorflow as tf
 import cirq
 import sympy
 from math import exp
-from tfq_models.base_model import Small_VQC_Model, Full_Param_VQC_Model, VQC_Model
+from tfq_models.lockwood.base_model import Small_VQC_Model, Full_Param_VQC_Model, VQC_Model
 
 class Cartpole_Model(VQC_Model, ABC):
 

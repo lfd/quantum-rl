@@ -3,7 +3,7 @@ import cirq
 import sympy
 import tensorflow as tf
 import numpy as np
-from tfq_models.base_model import Small_VQC_Model, Full_Param_VQC_Model, VQC_Model
+from tfq_models.lockwood.base_model import Small_VQC_Model, Full_Param_VQC_Model, VQC_Model
 
 class Blackjack_Model(VQC_Model, ABC):
 
