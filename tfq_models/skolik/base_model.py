@@ -7,70 +7,20 @@ import cirq
 import numpy as np
 import sympy
 
+from tfq_models.vqc_model import VQC_Model_Base
+
 # VQC as Keras Model
-class VQC_Model(keras.Model, ABC):
+class VQC_Model(VQC_Model_Base, ABC):
 
-    def __init__(self,  num_qubits, 
-                        num_layers, 
-                        activation='linear', 
-                        scale=None, 
-                        hybrid=False):
-        super(VQC_Model, self).__init__()
+    def _encoding_ops(self, input, qubit):
+        return cirq.rx(input).on(qubit)
 
-        if hybrid and scale is None:
-            raise ValueError("Hybrid netwok can not be initialized when scale is given.")
+    def build_readout_op(self):
+        return [cirq.Z(self.qubits[i]) for i in range(self.num_qubits-2, self.num_qubits)]
 
-        circuit = cirq.Circuit()
-
-        self.num_qubits = num_qubits
-        self.num_layers = num_layers
-        self.qubits = cirq.GridQubit.rect(1, self.num_qubits)
-        self.activation=keras.layers.Activation(activation)
-
-        circuit += self.create_circuit()
-
-        if hybrid:
-            self.scale = keras.layers.Dense(2, activation=activation) 
-            readout_op = [cirq.Z(self.qubits[i]) for i in range(num_qubits)]
-        else:
-            # when no hybrid model is used measure output of last two qubits
-            self.scale = scale
-            readout_op = [cirq.Z(self.qubits[i]) for i in range(self.num_qubits-2, self.num_qubits)]
-
-        self.vqc = tfq.layers.ControlledPQC(circuit, readout_op, 
-            differentiator=tfq.differentiators.ParameterShift())
-
-        self.scale = scale
-
-    def call(self, inputs, trainig=False):
-        x = [ self.encode_data(input, asTensor=True) for input in inputs ]
-        weights = self.reparameterize(self.w)
-        x = tf.concat([self.vqc([i, weights]) for i in x], axis=0)
-        if(self.scale is not None):
-            x = self.scale(x)
-        return x
-
-    def encode_data(self, input, asTensor=True):
-        circuit = cirq.Circuit()
-        for i, angle in enumerate(input):
-            angle = angle.numpy()
-            circuit.append(cirq.rx(angle).on(self.qubits[i]))
-        if asTensor:
-            return tfq.convert_to_tensor([circuit])
-        else:
-            return circuit
-
-    def reparameterize(self, weights):
-        return self.activation(weights) * 2. * np.pi
-        
     @abstractmethod
     def create_circuit(self):
         pass
-
-    @abstractmethod
-    def vqc_layer(self, symbols):
-        pass
-
 
 class Small_VQC_Model(VQC_Model):
 
@@ -83,11 +33,11 @@ class Small_VQC_Model(VQC_Model):
         self.w = tf.Variable(initial_value=np.random.uniform(0, 1, (1, num_weights)), dtype="float32", trainable=True, name="weights")
 
         for idx in range(self.num_layers):
-            circuit += self.vqc_layer(symbols=weight_symbols[idx*self.num_qubits : (idx+1)*self.num_qubits])
+            circuit += self._vqc_layer(symbols=weight_symbols[idx*self.num_qubits : (idx+1)*self.num_qubits])
 
         return circuit
 
-    def vqc_layer(self, symbols):
+    def _vqc_layer(self, symbols):
         circuit = cirq.Circuit()
 
         # Apply qubit rotations
@@ -119,11 +69,11 @@ class Big_VQC_Model(VQC_Model):
         self.w = tf.Variable(initial_value=np.random.uniform(0, 1, (1, num_weights)), dtype="float32", trainable=True, name="weights")
 
         for idx in range(self.num_layers):
-            circuit += self.vqc_layer(symbols=weight_symbols[idx*self.num_qubits*3 : (idx+1)*self.num_qubits*3])
+            circuit += self._vqc_layer(symbols=weight_symbols[idx*self.num_qubits*3 : (idx+1)*self.num_qubits*3])
 
         return circuit
 
-    def vqc_layer(self, symbols):
+    def _vqc_layer(self, symbols):
         circuit = cirq.Circuit()
 
         # Apply qubit rotations
