@@ -5,9 +5,6 @@ import pennylane as qml
 import tensorflow as tf
 from tensorflow import keras
 
-import tensorflow_quantum as tfq
-import cirq
-import sympy
 
 def _reparameterize(weights, nonlinearity):
 
