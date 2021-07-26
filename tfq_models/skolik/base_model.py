@@ -59,7 +59,7 @@ class VQC_Model(VQC_Model_Base):
 
     def store_weights_in_layers(self):
         trainable_layers = [layer for layer in self.vqc_layers if layer.trainable]
-        layer_weights = np.reshape(self.w, (-1, int(self.w.shape[1]/len(trainable_layers))))
+        layer_weights = np.reshape(self.w[0], (-1, int(self.w.shape[1]/len(trainable_layers))))
         for i, layer in enumerate(trainable_layers):
             layer.update_weights(layer_weights[i])
 
