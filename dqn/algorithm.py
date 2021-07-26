@@ -41,7 +41,7 @@ class DQN:
 
     def train(self, num_steps, train_after, train_every, update_every, 
         validate_every, num_val_steps, batch_size, on_transition=None,
-        on_train=None, on_validate=None):
+        on_train=None, on_validate=None, num_steps_per_layer=None,):
 
         # counts validation epochs
         epoch = 0
@@ -134,10 +134,19 @@ class DQN:
                         batch=batch
                     )
 
+            # layerwise learning only
+            if num_steps_per_layer and train_step > 0 and train_step % num_steps_per_layer == 0:
+                self.policy_model.next_configuration()
+                if self.target_model.phase == 0:
+                    self.target_model.next_configuration()
+                    self.target_model.copy_layers(self.policy_model)
+                
             if train_step % update_every == 0:
                 self.target_model.set_weights(
                     self.policy_model.get_weights()
                 )
+                if num_steps_per_layer:
+                    self.target_model.copy_weights(self.policy_model)
 
             if train_step % validate_every == 0:
                 val_return = validate(

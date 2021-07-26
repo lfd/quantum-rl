@@ -2,7 +2,7 @@
 
 from wrappers import CartPoleEncoding, ToDoubleTensorFloat32
 
-from tfq_models.skolik.base_model import Big_VQC_Model
+from tfq_models.skolik.base_model import VQC_Model
 import gym
 from tensorflow import keras
 from models import Scale
@@ -20,8 +20,9 @@ val_env = CartPoleEncoding(val_env)
 val_env = ToDoubleTensorFloat32(val_env)
 
 ## Model
-policy_model = Big_VQC_Model(num_qubits=4, num_layers=3, scale=Scale(name="scale"))
-target_model = Big_VQC_Model(num_qubits=4, num_layers=3, scale=Scale(name="scale"))
+policy_model = VQC_Model(num_qubits=4, num_layers=8, hybrid=True)
+target_model = VQC_Model(num_qubits=4, num_layers=8, hybrid=True)
+target_model.copy_layers(policy_model)
 target_model.set_weights(policy_model.get_weights())
 
 ## Optimization
@@ -41,4 +42,5 @@ num_val_steps = 5000
 epsilon_start = 1.0
 epsilon_end = 0.01
 epsilon_duration = 20000
+num_steps_per_layer = 3000
 

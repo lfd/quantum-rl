@@ -93,6 +93,8 @@ if __name__ == '__main__':
 
             tf.summary.scalar('epoch/avg_return', val_return, epoch)
 
+    num_steps_per_layer=config.num_steps_per_layer if hasattr(config, 'num_steps_per_layer') else None
+    
     algorithm.train(
         num_steps=config.num_steps,
         train_after=config.train_after,
@@ -104,4 +106,5 @@ if __name__ == '__main__':
         on_transition=on_transition,
         on_train=on_train,
         on_validate=on_validate,
+        num_steps_per_layer=num_steps_per_layer
     )

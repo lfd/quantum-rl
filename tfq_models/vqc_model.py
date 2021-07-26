@@ -14,7 +14,7 @@ class VQC_Model_Base(keras.Model, ABC):
                         hybrid=False):
         super(VQC_Model_Base, self).__init__()
         
-        if hybrid and scale is None:
+        if hybrid and scale is not None:
             raise ValueError("Hybrid netwok can not be initialized when scale is given.")
 
         self.circuit = cirq.Circuit()
