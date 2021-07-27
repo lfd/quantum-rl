@@ -97,7 +97,7 @@ class Small_VQC_Model(VQC_Model, ABC):
         num_weights = self.num_qubits*self.num_layers
 
         weight_symbols = sympy.symbols(f'weights0:{num_weights}')
-        self.w = tf.Variable(initial_value=np.random.uniform(0, 1, (1, num_weights)), dtype="float32", trainable=True, name="weights")
+        self.w = tf.Variable(initial_value=np.zeros((1, num_weights)), dtype="float32", trainable=True, name="weights")
 
         for idx in range(self.num_layers):
             circuit += self._vqc_layer(symbols=weight_symbols[idx*self.num_qubits : (idx+1)*self.num_qubits])
@@ -129,7 +129,7 @@ class Full_Param_VQC_Model(VQC_Model, ABC):
         num_weights = self.num_qubits*self.num_layers*3
 
         weight_symbols = sympy.symbols(f'weights0:{num_weights}')
-        self.w = tf.Variable(initial_value=np.random.uniform(0, 1, (1, num_weights)), dtype="float32", trainable=True, name="weights")
+        self.w = tf.Variable(initial_value=np.zeros((1, num_weights)), dtype="float32", trainable=True, name="weights")
 
         for idx in range(self.num_layers):
             circuit += self._vqc_layer(symbols=weight_symbols[idx*self.num_qubits*3 : (idx+1)*self.num_qubits*3])

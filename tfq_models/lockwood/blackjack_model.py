@@ -21,12 +21,14 @@ class Blackjack_Model(VQC_Model, ABC):
             num_pool_weights = 9
 
         pool_symbols = sympy.symbols(f'pool0:{num_pool_weights}')
-        p = tf.Variable(initial_value=np.random.uniform(0, 1, (1, num_pool_weights)), dtype="float32", trainable=True, name="pool_weights")
 
         circuit += pool(source=self.qubits[0], sink=self.qubits[2], 
                             symbols=pool_symbols)
 
-        self.w = tf.concat([p, self.w], axis=1)
+        pooling_weights = np.zeros((1, num_pool_weights), dtype='float32')
+        weight_values = tf.concat([pooling_weights, self.w], axis=1) 
+        self.w = tf.Variable(initial_value=weight_values, 
+                                dtype='float32', trainable=True, name='weights')
         
         return circuit
 
