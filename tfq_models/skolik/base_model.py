@@ -37,7 +37,8 @@ class VQC_Model(VQC_Model_Base):
         return cirq.rx(input).on(qubit)
 
     def build_readout_op(self):
-        return [cirq.Z(self.qubits[i]) for i in range(self.num_qubits-2, self.num_qubits)]
+        return [ cirq.PauliString(cirq.Z(qubit) for qubit in self.qubits[:2]),
+                 cirq.PauliString(cirq.Z(qubit) for qubit in self.qubits[2:]) ]
 
     def next_configuration(self):
         self.store_weights_in_layers()
