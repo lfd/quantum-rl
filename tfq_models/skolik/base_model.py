@@ -3,11 +3,10 @@ import tensorflow as tf
 import tensorflow_quantum as tfq
 import cirq
 import numpy as np
-import sympy
 
 from tfq_models.vqc_model import VQC_Model_Base
+from tfq_models.skolik.vqc_layers import VQC_Layer
 
-# TODO add different configuration
 # TODO documentation
 class VQC_Model(VQC_Model_Base):
 
@@ -19,12 +18,14 @@ class VQC_Model(VQC_Model_Base):
                         initial_layers=2,
                         p=2,
                         q=4,
-                        r=0.2):
+                        r=0.2,
+                        layertype = VQC_Layer):
         self.initial_layers=initial_layers
         self.p=p
         self.q=q
         self.r=r
         self.phase=0
+        self.Layer = layertype
 
         super(VQC_Model, self).__init__( num_qubits, 
                                             num_layers, 
@@ -104,74 +105,9 @@ class VQC_Model(VQC_Model_Base):
         circuit = cirq.Circuit()
 
         for idx in range(num):
-            layer = VQC_Layer(self.qubits, len(self.vqc_layers), self.activation)
+            layer = self.Layer(self.qubits, len(self.vqc_layers), self.activation)
             self.vqc_layers.append(layer)
             circuit += layer.circuit
 
         return circuit
-
-class VQC_Layer:
-    def __init__(self, qubits, idx, activation, trainable=True):
-        self.trainable = trainable
-        self.num_qubits = len(qubits)
-        self.qubits=qubits
-        self.layer_idx=idx
-        self.activation=activation
-        self.gate_indices=np.random.randint(0, 3, size=self.num_qubits)
-        self._weights = np.zeros(self.num_qubits, dtype='float32')
-
-        self.build()
-
-    def build(self):
-        if self.trainable:
-            angles = sympy.symbols(f'weights_l{self.layer_idx}_0:{self.num_qubits}')
-        else:
-            angles = self._reparameterize(self._weights).numpy()
-
-        self._circuit = cirq.Circuit()
-
-        # Apply qubit rotations
-        for idx in range(self.num_qubits):
-            self._circuit.append(self._generate_gate(idx, angles))
-
-        # Create entanglement
-        for i in range(self.num_qubits-1):
-            for j in range(i+1, self.num_qubits):
-                self._circuit.append(cirq.CZ.on(self.qubits[i], self.qubits[j]))
-
-        return self._circuit
-
-    def _generate_gate(self, qubit_idx, symbols):
-        rotation_gates = [cirq.rx(symbols[qubit_idx]).on(self.qubits[qubit_idx]), 
-                        cirq.ry(symbols[qubit_idx]).on(self.qubits[qubit_idx]),
-                        cirq.rz(symbols[qubit_idx]).on(self.qubits[qubit_idx])]
-        return rotation_gates[self.gate_indices[qubit_idx]]
-
-    def update_weights(self, weights):
-        self._weights = weights
-
-    def get_trainable_weights(self):
-        return self.weights if self.trainable else [] 
-
-    def freeze_weights(self):
-        if self.trainable:
-            self.trainable = False
-            self.build()
-
-    def unfreeze_weights(self):
-        if not self.trainable:
-            self.trainable = True
-            self.build()
-
-    # TODO multiple function definition -> refactor
-    def _reparameterize(self, weights):
-        return self.activation(weights) * 2. * np.pi
-
-    @property
-    def circuit(self):
-        return self._circuit
-
-    @property
-    def weights(self):
-        return self._weights
 

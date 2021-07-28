@@ -1,4 +1,5 @@
 
+from tfq_models.skolik.vqc_layers import VQC_Layer
 import tensorflow as tf
 
 from dqn.policies import ActionValuePolicy, EpsilonGreedyPolicy, LinearDecay
@@ -139,14 +140,22 @@ class DQN:
                 self.policy_model.next_configuration()
                 if self.target_model.phase == 0:
                     self.target_model.next_configuration()
-                    self.target_model.copy_layers(self.policy_model)
+                    if isinstance(self.target_model.vqc_layers[0], VQC_Layer):
+                        self.target_model.copy_layers(self.policy_model)
                 
             if train_step % update_every == 0:
-                self.target_model.set_weights(
-                    self.policy_model.get_weights()
-                )
                 if num_steps_per_layer:
+                    # only update weights for scale
+                    update_weights = self.policy_model.get_weights()[:-1].copy()
+                    update_weights.append(self.target_model.get_weights()[-1])
+                    self.target_model.set_weights(update_weights)
+
+                    # update vqc weights
                     self.target_model.copy_weights(self.policy_model)
+                else:
+                    self.target_model.set_weights(
+                        self.policy_model.get_weights()
+                    )
 
             if train_step % validate_every == 0:
                 val_return = validate(
