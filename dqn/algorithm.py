@@ -1,5 +1,5 @@
 
-from tfq_models.skolik.vqc_layers import VQC_Layer
+from tfq_models.vqc_layers import VQC_Layer_Skolik
 import tensorflow as tf
 
 from dqn.policies import ActionValuePolicy, EpsilonGreedyPolicy, LinearDecay
@@ -135,14 +135,6 @@ class DQN:
                         batch=batch
                     )
 
-            # layerwise learning only
-            if num_steps_per_layer and train_step > 0 and train_step % num_steps_per_layer == 0:
-                self.policy_model.next_configuration()
-                if self.target_model.phase == 0:
-                    self.target_model.next_configuration()
-                    if isinstance(self.target_model.vqc_layers[0], VQC_Layer):
-                        self.target_model.copy_layers(self.policy_model)
-                
             if train_step % update_every == 0:
                 if num_steps_per_layer:
                     # only update weights for scale
@@ -176,3 +168,11 @@ class DQN:
                     )
 
                 epoch += 1
+            
+            # layerwise learning only
+            if num_steps_per_layer and train_step > 0 and train_step % num_steps_per_layer == 0:
+                self.policy_model.next_configuration()
+                if self.target_model.phase == 0:
+                    self.target_model.next_configuration()
+                    if isinstance(self.target_model.vqc_layers[0], VQC_Layer_Skolik):
+                        self.target_model.copy_layers(self.policy_model)
