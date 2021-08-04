@@ -108,7 +108,7 @@ class Pooling_Layer_Small(Pooling_Layer_Base):
         else:
             angles = self._reparameterize(self._weights).numpy()
 
-        angles = angles.append(angles[:3])
+        angles = angles + angles[:3]
 
         self._build(angles)
 
