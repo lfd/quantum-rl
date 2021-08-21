@@ -49,3 +49,8 @@ class BlackjackEncoding(gym.ObservationWrapper):
         usable = np.pi if obs[2] else 0
         
         return (curr_sum, dealer, usable)
+
+class ContinousEncoding(gym.ObservationWrapper):
+
+    def observation(self, obs):
+        return np.arctan(obs)

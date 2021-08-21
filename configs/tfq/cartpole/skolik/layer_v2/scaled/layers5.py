@@ -22,15 +22,15 @@ val_env = CartPoleEncoding(val_env)
 val_env = ToDoubleTensorFloat32(val_env)
 
 ## Model
-policy_model = VQC_Model(num_qubits=4, num_layers=8, 
-                        q=8,
-                        initial_layers=8,
+policy_model = VQC_Model(num_qubits=4, num_layers=5, 
+                        q=5,
+                        initial_layers=5,
                         scale=Scale(name="scale"),
                         layertype=VQC_Layer_Skolik_V2,
                         encoding_ops=encoding_ops_skolik)
-target_model = VQC_Model(num_qubits=4, num_layers=8, 
-                        q=8,
-                        initial_layers=8,
+target_model = VQC_Model(num_qubits=4, num_layers=5, 
+                        q=5,
+                        initial_layers=5,
                         scale=Scale(name="scale"),
                         layertype=VQC_Layer_Skolik_V2,
                         encoding_ops=encoding_ops_skolik)

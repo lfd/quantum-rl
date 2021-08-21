@@ -3,7 +3,7 @@
 from tfq_models.utils import encoding_ops_skolik
 from tfq_models.vqc_layers import VQC_Layer_Skolik_V2
 from tfq_models.vqc_model import VQC_Model
-from wrappers import CartPoleEncoding, ToDoubleTensorFloat32
+from wrappers import ContinousEncoding, ToDoubleTensorFloat32
 
 import gym
 from tensorflow import keras
@@ -14,23 +14,19 @@ keras.backend.set_floatx('float32')
 
 ## Environment
 env = gym.make('CartPole-v0')
-env = CartPoleEncoding(env)
+env = ContinousEncoding(env)
 env = ToDoubleTensorFloat32(env)
 
 val_env = gym.make('CartPole-v0')
-val_env = CartPoleEncoding(val_env)
+val_env = ContinousEncoding(val_env)
 val_env = ToDoubleTensorFloat32(val_env)
 
 ## Model
-policy_model = VQC_Model(num_qubits=4, num_layers=8, 
-                        q=8,
-                        initial_layers=8,
+policy_model = VQC_Model(num_qubits=4, num_layers=3, 
                         scale=Scale(name="scale"),
                         layertype=VQC_Layer_Skolik_V2,
                         encoding_ops=encoding_ops_skolik)
-target_model = VQC_Model(num_qubits=4, num_layers=8, 
-                        q=8,
-                        initial_layers=8,
+target_model = VQC_Model(num_qubits=4, num_layers=3, 
                         scale=Scale(name="scale"),
                         layertype=VQC_Layer_Skolik_V2,
                         encoding_ops=encoding_ops_skolik)
