@@ -122,7 +122,7 @@ class DQN:
                 )
 
                 # Calculate Circuit Gradients manually if autgrad is disabled. (Only Used with Qiskit)
-                grads = [self.policy_model.backward(batch.states)*loss.numpy() if grad is None else grad for grad in grads]
+                grads = [self.policy_model.backward(batch.states)*2*loss.numpy() if grad is None else grad for grad in grads]
                     
                 self.optimizer.apply_gradients(
                     zip(grads, self.policy_model.trainable_variables)

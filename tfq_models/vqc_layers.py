@@ -95,9 +95,9 @@ class Pooling_Layer_Base(Layer_Base, ABC):
                             cirq.rz(-angles[8]).on(self.sink)])
 
 
-class Pooling_Layer_Small(Pooling_Layer_Base):
+class Pooling_Layer_V1(Pooling_Layer_Base):
     def __init__(self, idx, activation, source, sink, trainable=True):
-        super(Pooling_Layer_Small, self).__init__(idx, activation, source, sink, trainable)
+        super(Pooling_Layer_V1, self).__init__(idx, activation, source, sink, trainable)
         self.num_weights=6
         self._weights=np.zeros(self.num_weights, dtype='float32')
         self.build()
@@ -112,9 +112,9 @@ class Pooling_Layer_Small(Pooling_Layer_Base):
 
         self._build(angles)
 
-class Pooling_Layer_Big(Pooling_Layer_Base):
+class Pooling_Layer_V2(Pooling_Layer_Base):
     def __init__(self, idx, activation, source, sink, trainable=True):
-        super(Pooling_Layer_Big, self).__init__(idx, activation, source, sink, trainable)
+        super(Pooling_Layer_V2, self).__init__(idx, activation, source, sink, trainable)
         self.num_weights=9
         self._weights=np.zeros(self.num_weights, dtype='float32')
         self.build()

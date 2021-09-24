@@ -1,5 +1,4 @@
 from abc import ABC, abstractmethod
-from qiskit import circuit
 from qiskit_machine_learning.neural_networks import CircuitQNN
 import tensorflow as tf
 from tensorflow import keras
@@ -25,7 +24,8 @@ class VQC_Model(keras.Model, ABC):
         self.num_qubits = num_qubits
         self.num_layers = num_layers
 
-        self.activation=keras.layers.Activation(activation)
+
+        self.activation=activation 
 
         self.pooling = pooling
 
@@ -63,7 +63,7 @@ class VQC_Model(keras.Model, ABC):
     # Calculates VQCs Gradients
     # TODO: check if there is a more efficient way
     def backward(self, inputs):
-        _, grads = self.qnn.backward(inputs, self.reparameterize(self.w_var))
+        _, grads = self.qnn.backward(inputs, self.derive_reparameterize(self.w_var))
 
         # Limit gradients to measured qubits only and sum up
         grads = np.sum(grads[:,:4], axis=0)
@@ -80,7 +80,10 @@ class VQC_Model(keras.Model, ABC):
             self.circuit.rz(angle, i)
 
     def reparameterize(self, weights):
-        return self.activation(weights) * 2. * np.pi
+        return keras.activations.sigmoid(weights) * 2. * np.pi  if self.activation == 'sigmoid' else weights
+
+    def derive_reparameterize(self, weights):
+        return keras.activations.sigmoid(weights)*(1-keras.activations.sigmoid(weights)) * 2. * np.pi if self.activation == 'sigmoid' else weights
 
     # Base pooling
     def _pool(self, source, sink, symbols):
@@ -99,9 +102,9 @@ class VQC_Model(keras.Model, ABC):
     def pool_v1(self, source, sink, symbols):
         self._pool(source, sink, symbols)
 
-        self.circuit.rx(-symbols[0], sink)
-        self.circuit.ry(-symbols[1], sink)
-        self.circuit.rz(-symbols[2], sink)
+        self.circuit.rx(-symbols[3], sink)
+        self.circuit.ry(-symbols[4], sink)
+        self.circuit.rz(-symbols[5], sink)
 
 
     # pooling approach using 9 parameters

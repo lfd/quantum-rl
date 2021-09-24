@@ -9,13 +9,6 @@ class ToDoubleTensor(gym.ObservationWrapper):
     def observation(self, obs):
         return tf.convert_to_tensor(obs, dtype=tf.float64)
 
-
-class ToDoubleTensorFloat32(gym.ObservationWrapper):
-    
-    def observation(self, obs):
-        return tf.convert_to_tensor(obs, dtype=tf.float32)
-
-
 class CartPoleEncoding(gym.ObservationWrapper):
     
     def observation(self, obs):
