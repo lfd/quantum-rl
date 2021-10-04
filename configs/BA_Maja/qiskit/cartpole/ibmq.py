@@ -2,7 +2,7 @@
 
 from wrappers import CartPoleEncoding, ToDoubleTensor
 
-from qiskit_models.cartpole_model import Full_Param_Cartpole_Model
+from qiskit_models.cartpole_model import Cartpole_Model
 import gym
 from tensorflow import keras
 from models import Scale
@@ -27,12 +27,15 @@ provider=IBMQ.get_provider(group='open')
 backend=provider.get_backend('ibmq_belem')
 
 ## Model
-policy_model = Full_Param_Cartpole_Model(num_qubits=4, num_layers=3, 
+policy_model = Cartpole_Model(num_qubits=4, num_layers=3, 
                                         activation='sigmoid', 
-                                        scale=Scale(name="scale"))
-target_model = Full_Param_Cartpole_Model(num_qubits=4, num_layers=3, 
+                                        scale=Scale(name="scale"),
+                                        backend=backend)
+                                        
+target_model = Cartpole_Model(num_qubits=4, num_layers=3, 
                                         activation='sigmoid', 
-                                        scale=Scale(name="scale"))
+                                        scale=Scale(name="scale"),
+                                        backend=backend)
 target_model.set_weights(policy_model.get_weights())
 
 ## Optimization

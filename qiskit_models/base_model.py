@@ -8,26 +8,22 @@ from qiskit.circuit import ParameterVector, QuantumCircuit
 from qiskit.utils import QuantumInstance
 
 
-# VQC as Keras Model
+# full parameterized VQC as in Lockwoods reference implementation (https://github.com/lockwo/quantum_computation)
 class VQC_Model(keras.Model, ABC):
 
     def __init__(self,  num_qubits, 
         num_layers, 
         activation='linear', 
-        scale=None, 
-        pooling='v1', 
-        device=Aer.get_backend('qasm_simulator'),
-        shots=10):
+        scale=None,
+        backend=Aer.get_backend('qasm_simulator'),
+        shots=1024):
 
         super(VQC_Model, self).__init__()
 
         self.num_qubits = num_qubits
         self.num_layers = num_layers
 
-
         self.activation=activation 
-
-        self.pooling = pooling
 
         self.circuit = QuantumCircuit(self.num_qubits, 2)
         self.encode_data()
@@ -37,12 +33,12 @@ class VQC_Model(keras.Model, ABC):
 
         self.w_var = tf.Variable(
             initial_value=np.random.uniform(0, 1, (self.num_weights + self.num_pool_weights)), 
-            dtype="float32", 
+            dtype="float64", 
             trainable=True, 
             name="weights"
         )
 
-        qi = QuantumInstance(device, shots=shots)
+        qi = QuantumInstance(backend, shots=shots)
 
         self.qnn = CircuitQNN(circuit=self.circuit,
                     input_params=self.input_params,
@@ -85,7 +81,7 @@ class VQC_Model(keras.Model, ABC):
     def derive_reparameterize(self, weights):
         return keras.activations.sigmoid(weights)*(1-keras.activations.sigmoid(weights)) * 2. * np.pi if self.activation == 'sigmoid' else weights
 
-    # Base pooling
+    # using pooling as in reference implementation
     def _pool(self, source, sink, symbols):
         self.circuit.rx(symbols[0], source)
         self.circuit.ry(symbols[1], source)
@@ -97,74 +93,9 @@ class VQC_Model(keras.Model, ABC):
 
         self.circuit.cx(source, sink)
 
-    # using pooling as in reference implementation
-    # Uses 6 symbols
-    def pool_v1(self, source, sink, symbols):
-        self._pool(source, sink, symbols)
-
         self.circuit.rx(-symbols[3], sink)
         self.circuit.ry(-symbols[4], sink)
         self.circuit.rz(-symbols[5], sink)
-
-
-    # pooling approach using 9 parameters
-    # Use different parameters for last sink rotation
-    def pool_v2(self, source, sink, symbols):
-        self._pool(source, sink, symbols)
-
-        self.circuit.rx(-symbols[6], sink)
-        self.circuit.ry(-symbols[7], sink)
-        self.circuit.rz(-symbols[8], sink)
-
-
-    @abstractmethod
-    def build_readout_op(self):
-        pass
-        
-    @abstractmethod
-    def create_circuit(self):
-        pass
-
-    @abstractmethod
-    def build_pooling_layer(self):
-        pass
-
-    @abstractmethod
-    def vqc_layer(self, symbols):
-        pass
-
-    # Interprete output of CircuitQNN
-    @abstractmethod
-    def _interprete_probabilities(self, x):
-        pass
-
-
-# VQC as described in Lockwood/Si Paper (20 Parameters)
-class Small_VQC_Model(VQC_Model, ABC):
-
-    def create_circuit(self):
-        self.num_weights = self.num_qubits*self.num_layers
-
-        self.w = ParameterVector('w', self.num_weights)
-        
-        for idx in range(self.num_layers):
-            self.vqc_layer(symbols=self.w[idx*self.num_qubits : (idx+1)*self.num_qubits])
-
-
-    def vqc_layer(self, symbols):
-        # Create entanglement
-        for idx in range(1, self.num_qubits):
-            self.circuit.cx(idx, idx-1)
-
-        # Apply qubit rotations
-        for idx in range(self.num_qubits):
-            self.circuit.rx(symbols[idx], idx)
-            self.circuit.ry(0.5 * np.pi, idx)
-            self.circuit.rz(np.pi, idx)
-
-
-# full parameterized VQC as in reference implementation (https://github.com/lockwo/quantum_computation)
-class Full_Param_VQC_Model(VQC_Model, ABC):
 
     def create_circuit(self):
         self.num_weights = self.num_qubits*self.num_layers*3
@@ -173,7 +104,6 @@ class Full_Param_VQC_Model(VQC_Model, ABC):
 
         for idx in range(self.num_layers):
             self.vqc_layer(symbols=self.w[idx*self.num_qubits*3 : (idx+1)*self.num_qubits*3])
-
 
     def vqc_layer(self, symbols):
         # Create entanglement0
@@ -186,4 +116,17 @@ class Full_Param_VQC_Model(VQC_Model, ABC):
             self.circuit.rx(weight_symbols[0], idx)
             self.circuit.ry(weight_symbols[1], idx)
             self.circuit.rz(weight_symbols[2], idx)
+
+    @abstractmethod
+    def build_readout_op(self):
+        pass
+
+    @abstractmethod
+    def build_pooling_layer(self):
+        pass
+
+    # Interprete output of CircuitQNN
+    @abstractmethod
+    def _interprete_probabilities(self, x):
+        pass
 
