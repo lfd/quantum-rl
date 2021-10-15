@@ -34,7 +34,7 @@ class VQC_Model(keras.Model):
         self.num_qubits = num_qubits
         self.num_layers = num_layers
         self.qubits = cirq.GridQubit.rect(1, self.num_qubits)
-        self.activation=keras.layers.Activation(activation)
+        self.activation=activation
         self.initial_layers=initial_layers
         self.p=p
         self.q=q
@@ -99,7 +99,7 @@ class VQC_Model(keras.Model):
         return x
 
     def _reparameterize(self, weights):
-        return self.activation(weights) * 2. * np.pi
+        return keras.activations.sigmoid(weights) * 2. * np.pi  if self.activation == 'sigmoid' else weights
 
     def create_circuit(self):
         layer_circuit = self.add_layers(self.initial_layers)

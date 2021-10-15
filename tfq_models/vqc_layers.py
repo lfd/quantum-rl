@@ -2,6 +2,7 @@ from abc import ABC, abstractmethod
 import cirq
 import numpy as np
 import sympy
+from tensorflow import keras
 
 class Layer_Base(ABC):
     def __init__(self, idx, activation, trainable=True):
@@ -28,7 +29,7 @@ class Layer_Base(ABC):
 
     # TODO multiple function definition -> refactor
     def _reparameterize(self, weights):
-        return self.activation(weights) * 2. * np.pi
+        return keras.activations.sigmoid(weights) * 2. * np.pi  if self.activation == 'sigmoid' else weights
 
     @property
     def circuit(self):
