@@ -236,3 +236,9 @@ class VQC_Layer_Lockwood_V2(Regular_Layer_Base):
         return [cirq.rx(symbols[qubit_idx*3]).on(self.qubits[qubit_idx]),
                 cirq.ry(0.5 * np.pi).on(self.qubits[qubit_idx]), 
                 cirq.rz(np.pi).on(self.qubits[qubit_idx])]
+
+class VQC_Layer_Lockwood_V3(VQC_Layer_Lockwood):
+    def _add_entanglement_gates(self):
+        for i in range(self.num_qubits-1):
+            for j in range(i+1, self.num_qubits):
+                self._circuit.append(cirq.CZ.on(self.qubits[i], self.qubits[j]))
