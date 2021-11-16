@@ -1,6 +1,7 @@
 from datetime import datetime
 import importlib
 import sys
+import numpy as np
 
 import tensorflow as tf
 from dqn.algorithm import DQN
@@ -22,6 +23,17 @@ if __name__ == '__main__':
     config_name = sys.argv[1]
     config = importlib.import_module(f'configs.{config_name}')
 
+    update_every_start=config.update_every_start if hasattr(config, 'update_every_start') else None
+    update_every_end=config.update_every_end if hasattr(config, 'update_every_end') else None
+    update_every_duration=config.update_every_duration if hasattr(config, 'update_every_duration') else None
+    optimizer_output=config.optimizer_output if hasattr(config, 'optimizer_output') else None
+    num_steps_per_layer=config.num_steps_per_layer if hasattr(config, 'num_steps_per_layer') else None
+    update_every=config.update_every if hasattr(config, 'update_every') else None
+    num_val_trials=config.num_val_trials if hasattr(config, 'num_val_trials') else None
+    num_val_steps=config.num_val_steps if hasattr(config, 'num_val_steps') else None
+    num_val_steps_acceptance=config.num_val_steps_acceptance if hasattr(config, 'num_val_steps_acceptance') else None
+    acceptance_threshold=config.acceptance_threshold if hasattr(config, 'acceptance_threshold') else None
+
     algorithm = DQN(
         env=config.env,
         val_env=config.val_env,
@@ -31,8 +43,12 @@ if __name__ == '__main__':
         epsilon_duration=config.epsilon_duration,
         epsilon_start=config.epsilon_start,
         epsilon_end=config.epsilon_end,
+        update_every_start=update_every_start,
+        update_every_end=update_every_end,
+        update_every_duration=update_every_duration, 
         gamma=config.gamma,
         optimizer=config.optimizer,
+        optimizer_output=optimizer_output,
         loss=config.loss
     )
 
@@ -45,6 +61,9 @@ if __name__ == '__main__':
     episode = 0
     episode_rewards = []
     episode_explorations = 0
+
+    val_returns = []
+    val_steps = 0
 
 
     def on_transition(step, transition, did_explore, **kwargs):
@@ -80,7 +99,7 @@ if __name__ == '__main__':
 
 
     def on_validate(epoch, val_return, grads, **kwargs):
-        global summary_writer, config
+        global summary_writer, config, num_val_steps_acceptance, val_returns, val_steps
 
         # TODO model checkpointing
         # TODO video rendering
@@ -93,15 +112,20 @@ if __name__ == '__main__':
 
             tf.summary.scalar('epoch/avg_return', val_return, epoch)
 
-    num_steps_per_layer=config.num_steps_per_layer if hasattr(config, 'num_steps_per_layer') else None
+        if num_val_steps_acceptance and acceptance_threshold:
+            val_returns.append(val_return) 
+            val_steps +=1
+            if num_val_steps_acceptance < val_steps and np.min(val_returns[-num_val_steps_acceptance:]) > acceptance_threshold:
+                exit("Environment solved. Exit...")
     
     algorithm.train(
         num_steps=config.num_steps,
         train_after=config.train_after,
         train_every=config.train_every,
-        update_every=config.update_every,
+        update_every=update_every,       
         validate_every=config.validate_every,
-        num_val_steps=config.num_val_steps,
+        num_val_steps=num_val_steps,
+        num_val_trials=num_val_trials,
         batch_size=config.batch_size,
         on_transition=on_transition,
         on_train=on_train,

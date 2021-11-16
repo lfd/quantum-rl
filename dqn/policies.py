@@ -107,3 +107,32 @@ class LinearDecay:
         
         if self._step < self.num_steps:
             self.policy.epsilon = self.start + self._slope * self._step
+
+class LinearIncrease:
+    """Let's the `update_every` parameter increase linearly from a `start` to `end` 
+    over a set number of steps."""
+
+    def __init__(self, num_steps: int, start: int = 10, end: int = 1000):
+
+        if not start <= end:
+            raise ValueError(f'start must be smaller than or equal to end, but was start: {start}, end: {end}')
+
+        if num_steps <= 0:
+            raise ValueError(f'num_steps must be a positive integer, but was {num_steps}')
+
+        self.start = start 
+        self.end = end
+        self.num_steps = num_steps
+        
+        self.current = self.start
+
+        self._step = 0
+        self._slope = (end - start) / (num_steps - 1)
+        
+    
+    def step(self) -> None:
+
+        self._step += 1
+        
+        if self._step < self.num_steps:
+            self.current = int(self.start + self._slope * self._step)

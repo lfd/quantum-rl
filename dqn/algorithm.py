@@ -2,7 +2,7 @@
 from tfq_models.vqc_layers import VQC_Layer_Skolik
 import tensorflow as tf
 
-from dqn.policies import ActionValuePolicy, EpsilonGreedyPolicy, LinearDecay
+from dqn.policies import ActionValuePolicy, EpsilonGreedyPolicy, LinearDecay, LinearIncrease
 from dqn.replay import ReplayMemory
 from dqn.utils import Sampler
 from dqn.validate import validate
@@ -12,7 +12,9 @@ from dqn.validate import validate
 class DQN:
 
     def __init__(self, env, val_env, policy_model, target_model, replay_capacity, 
-        epsilon_duration, epsilon_start, epsilon_end, gamma, optimizer, loss):
+        epsilon_duration, epsilon_start, epsilon_end, gamma, optimizer, loss,
+        optimizer_output = None, update_every_start = None, update_every_end = None, 
+        update_every_duration = None):
 
         self.env = env
         self.val_env = val_env
@@ -34,20 +36,36 @@ class DQN:
             end=epsilon_end
         )
 
+        if update_every_start and update_every_end and update_every_duration:
+            self.update_every_schedule = LinearIncrease(
+                num_steps=update_every_duration,
+                start=update_every_start,
+                end=update_every_end
+            )
+        else: 
+            self.update_every_schedule = None
+
         self.gamma = gamma
         self.optimizer = optimizer
+        self.optimizer_output = optimizer_output
         self.loss = loss
 
 
 
-    def train(self, num_steps, train_after, train_every, update_every, 
-        validate_every, num_val_steps, batch_size, on_transition=None,
-        on_train=None, on_validate=None, num_steps_per_layer=None,):
+    def train(self, num_steps, train_after, train_every, validate_every, batch_size, 
+        update_every=None, on_transition=None, num_val_steps=None,
+        num_val_trials=None, on_train=None, on_validate=None, 
+        num_steps_per_layer=None,):
 
         # counts validation epochs
         epoch = 0
 
         sampler = Sampler(self.behavior_policy, self.env)
+
+        if not update_every:
+            update_every_current = self.update_every_schedule.current
+        else:
+            update_every_current = None
         
         for step in range(num_steps):
 
@@ -56,6 +74,8 @@ class DQN:
 
             if is_training:
                 self.epsilon_schedule.step()
+                if self.update_every_schedule:
+                    self.update_every_schedule.step()
 
             transition = sampler.step()
             self.memory.store(transition)
@@ -123,10 +143,19 @@ class DQN:
 
                 # Calculate Circuit Gradients manually if autgrad is disabled. (Only Used with Qiskit)
                 grads = [self.policy_model.backward(batch.states)*2*loss.numpy() if grad is None else grad for grad in grads]
-                    
-                self.optimizer.apply_gradients(
-                    zip(grads, self.policy_model.trainable_variables)
-                )
+
+                if self.optimizer_output:
+
+                    self.optimizer.apply_gradients(
+                        zip(grads[-1:], self.policy_model.trainable_variables[-1:])
+                    )
+                    self.optimizer_output.apply_gradients(
+                        zip(grads[:-1], self.policy_model.trainable_variables[:-1])
+                    )
+                else:
+                    self.optimizer.apply_gradients(
+                        zip(grads, self.policy_model.trainable_variables)
+                    )
 
                 if on_train:
                     on_train(
@@ -135,7 +164,8 @@ class DQN:
                         batch=batch
                     )
 
-            if train_step % update_every == 0:
+            if update_every and train_step % update_every == 0 or update_every_current and train_step == update_every_current:
+
                 if num_steps_per_layer:
                     # only update weights for scale
                     update_weights = self.policy_model.get_weights()[:-1].copy()
@@ -149,11 +179,15 @@ class DQN:
                         self.policy_model.get_weights()
                     )
 
+                if update_every_current:
+                    update_every_current = train_step + self.update_every_schedule.current
+
             if train_step % validate_every == 0:
                 val_return = validate(
                     self.val_env, 
                     self.greedy_policy, 
-                    num_val_steps
+                    num_val_steps,
+                    num_val_trials
                 )
 
                 if on_validate:
