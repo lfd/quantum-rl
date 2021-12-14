@@ -9,19 +9,17 @@ import pennylane as qml
 import tensorflow as tf
 from tensorflow import keras
 
-# Setup Keras to use 64-bit floats (required by PennyLane)
-keras.backend.set_floatx('float64')
-
 def model():
 
     NUM_QUBITS = 4
     NUM_LAYERS = 3
-    
+
+    keras.backend.set_floatx('float64')
     qml.enable_tape()
 
-    device = qml.device('default.qubit', wires=NUM_QUBITS)
+    device = qml.device('default.qubit.tf', wires=NUM_QUBITS)
 
-    @qml.qnode(device, interface='tf', diff_method='parameter-shift')
+    @qml.qnode(device, interface='tf', diff_method='backprop')
     def circuit(inputs, layer_weights, pooling_weights):
 
         # Encode input state
@@ -75,15 +73,15 @@ optimizer = keras.optimizers.Adam(learning_rate=1e-3)
 loss = keras.losses.MSE
 
 ## Hyperparameter
-num_steps = 50000
+num_steps = 100000
 train_after = 1000
 train_every = 1
 update_every = 500
-validate_every = 1000
-batch_size = 32
+validate_every = 500
+batch_size = 1
 replay_capacity=50000
 gamma = 0.99
 num_val_steps = 5000
 epsilon_start = 1.0
-epsilon_end = 0.01
-epsilon_duration = 20000
+epsilon_end = 0.02
+epsilon_duration = 10000

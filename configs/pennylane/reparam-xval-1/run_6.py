@@ -19,9 +19,9 @@ def model():
     
     qml.enable_tape()
 
-    device = qml.device('default.qubit', wires=NUM_QUBITS)
+    device = qml.device('default.qubit.tf', wires=NUM_QUBITS)
 
-    @qml.qnode(device, interface='tf', diff_method='parameter-shift')
+    @qml.qnode(device, interface='tf', diff_method='backprop')
     def circuit(inputs, layer_weights, pooling_weights):
 
         # Encode input state
@@ -71,17 +71,17 @@ target_model = model()
 target_model.set_weights(policy_model.get_weights())
 
 ## Optimization
-optimizer = keras.optimizers.Adam(learning_rate=1e-3)
+optimizer = keras.optimizers.Adam(learning_rate=1e-1)
 loss = keras.losses.MSE
 
 ## Hyperparameter
-num_steps = 50000
-train_after = 1000
+num_steps = 25000
+train_after = 500
 train_every = 1
-update_every = 500
-validate_every = 1000
+update_every = int(1e0)
+validate_every = 500
 batch_size = 32
-replay_capacity=50000
+replay_capacity=25000
 gamma = 0.99
 num_val_steps = 5000
 epsilon_start = 1.0

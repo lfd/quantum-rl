@@ -1,15 +1,13 @@
 import numpy as np
 import tensorflow as tf
 import gym
-import os
-
 
 class ToDoubleTensor(gym.ObservationWrapper):
     
     def observation(self, obs):
         return tf.convert_to_tensor(obs, dtype=tf.float64)
 
-class CartPoleEncoding(gym.ObservationWrapper):
+class ScaledDirectionalEncodingCP(gym.ObservationWrapper):
     
     def observation(self, obs):
 
@@ -26,7 +24,7 @@ class CartPoleEncoding(gym.ObservationWrapper):
         
         return obs
 
-class BlackjackEncoding(gym.ObservationWrapper):
+class ScaledDirectionalEncodingBJ(gym.ObservationWrapper):
     
     def observation(self, obs):
 
@@ -43,7 +41,7 @@ class BlackjackEncoding(gym.ObservationWrapper):
         
         return (curr_sum, dealer, usable)
 
-class CartPoleEncodingMix(gym.ObservationWrapper):
+class ScaledContEncodingCP(gym.ObservationWrapper):
     
     def observation(self, obs):
 
@@ -60,7 +58,7 @@ class CartPoleEncodingMix(gym.ObservationWrapper):
         
         return obs
 
-class BlackjackEncodingContinous(gym.ObservationWrapper):
+class ContDirectionalEncodingBJ(gym.ObservationWrapper):
     
     def observation(self, obs):
 

@@ -1,13 +1,19 @@
+
 # configs/cartpole-dnn.py
 
-from wrappers import ScaledDirectionalEncodingCP, ToDoubleTensor
+import random
 
+from wrappers import ScaledDirectionalEncodingCP, ToDoubleTensor
 from TF.models import Scale
 from TF.models_pl import pool, vqc_layer
+
 import gym
+import numpy as np
 import pennylane as qml
 import tensorflow as tf
 from tensorflow import keras
+
+
 
 # Setup Keras to use 64-bit floats (required by PennyLane)
 keras.backend.set_floatx('float64')
@@ -19,9 +25,9 @@ def model():
     
     qml.enable_tape()
 
-    device = qml.device('default.qubit', wires=NUM_QUBITS)
+    device = qml.device('default.qubit.tf', wires=NUM_QUBITS)
 
-    @qml.qnode(device, interface='tf', diff_method='parameter-shift')
+    @qml.qnode(device, interface='tf', diff_method='backprop')
     def circuit(inputs, layer_weights, pooling_weights):
 
         # Encode input state
@@ -75,15 +81,24 @@ optimizer = keras.optimizers.Adam(learning_rate=1e-3)
 loss = keras.losses.MSE
 
 ## Hyperparameter
-num_steps = 50000
-train_after = 1000
+num_steps = 25000
+train_after = 500
 train_every = 1
-update_every = 500
-validate_every = 1000
+update_every = int(1e0)
+validate_every = 500
 batch_size = 32
-replay_capacity=50000
+replay_capacity=25000
 gamma = 0.99
 num_val_steps = 5000
 epsilon_start = 1.0
 epsilon_end = 0.01
 epsilon_duration = 20000
+
+# Fix seeds for reproducible experiments
+seed = 1337
+
+random.seed(seed)
+env.seed(seed)
+val_env.seed(seed)
+np.random.seed(seed)
+tf.random.set_seed(seed)
