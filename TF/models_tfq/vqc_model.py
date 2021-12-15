@@ -9,12 +9,26 @@ import numpy as np
 
 # TODO documentation
 class VQC_Model(keras.Model):
+    """
+    This class represents a trainable VQC using TFQ.
 
+    Attributes:
+
+        num_qubits: Number of Qubits
+        num_layers: Number of VQC-Layers
+        activation: 'sigmoid' if nonlinearity should be applied to weights
+        in_scale: Keras-Layer representing trainable weights on the input
+        out_scale: Keras-Layer representing trainable weights on the input
+        encoding_ops: Rotation gates applied to inputs
+        readout_op: Extraction method, 'expval' or 'pooling'
+        layertype: VQC-Layer architecture
+        data_reuploading: whether to apply data re-uploading
+    """
     def __init__(self,  num_qubits, 
                         num_layers, 
                         activation='linear', 
-                        out_scale=None,
-                        in_scale=None,
+                        out_scale:keras.layers.Layer = None,
+                        in_scale:keras.layers.Layer = None,
                         encoding_ops = encoding_ops_lockwood,
                         readout_op = 'expval',
                         layertype = VQC_Layer_Lockwood,
