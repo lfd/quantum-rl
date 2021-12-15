@@ -1,7 +1,7 @@
 # configs/cartpole-dnn.py
 
-from TF.models_tfq.utils import encoding_ops_lockwood
-from TF.models_tfq.vqc_layers import VQC_Layer_Lockwood
+from TF.models_tfq.utils import encoding_ops_skolik
+from TF.models_tfq.vqc_layers import VQC_Layer_Skolik
 from TF.models_tfq.vqc_model import VQC_Model
 from wrappers import ContinousEncoding
 
@@ -20,14 +20,14 @@ val_env = gym.make('CartPole-v0')
 val_env = ContinousEncoding(val_env)
 
 ## Model
-policy_model = VQC_Model(num_qubits=4, num_layers=3, 
-                        out_scale=Scale(name="scale"),
-                        layertype=VQC_Layer_Lockwood,
-                        encoding_ops=encoding_ops_lockwood)
-target_model = VQC_Model(num_qubits=4, num_layers=3, 
-                        out_scale=Scale(name="scale"),
-                        layertype=VQC_Layer_Lockwood,
-                        encoding_ops=encoding_ops_lockwood)
+policy_model = VQC_Model(num_qubits=4, num_layers=5, 
+                    out_scale=Scale(name='scale'),
+                    layertype=VQC_Layer_Skolik,
+                    encoding_ops=encoding_ops_skolik)
+target_model = VQC_Model(num_qubits=4, num_layers=5, 
+                    out_scale=Scale(name='scale'),
+                    layertype=VQC_Layer_Skolik,
+                    encoding_ops=encoding_ops_skolik)
 
 target_model.set_weights(policy_model.get_weights())
 

@@ -3,7 +3,7 @@
 from TF.models_tfq.utils import encoding_ops_skolik
 from TF.models_tfq.vqc_layers import VQC_Layer_Skolik
 from TF.models_tfq.vqc_model import VQC_Model
-from wrappers import ScaledDirectionalEncodingCP
+from wrappers import ScaledContEncodingCP
 
 import gym
 from tensorflow import keras
@@ -14,22 +14,20 @@ keras.backend.set_floatx('float32')
 
 ## Environment
 env = gym.make('CartPole-v0')
-env = ScaledDirectionalEncodingCP(env)
+env = ScaledContEncodingCP(env)
 
 val_env = gym.make('CartPole-v0')
-val_env = ScaledDirectionalEncodingCP(val_env)
+val_env = ScaledContEncodingCP(val_env)
 
 ## Model
-policy_model = VQC_Model(num_qubits=4, num_layers=5,
-                        scale=SingleScale(name="scale"),
+policy_model = VQC_Model(num_qubits=4, num_layers=5, 
+                        out_scale=SingleScale(name="scale"),
                         layertype=VQC_Layer_Skolik,
-                        encoding_ops=encoding_ops_skolik,
-                        readout_op='pooling')
-target_model = VQC_Model(num_qubits=4, num_layers=5,
-                        scale=SingleScale(name="scale"),
+                        encoding_ops=encoding_ops_skolik)
+target_model = VQC_Model(num_qubits=4, num_layers=5, 
+                        out_scale=SingleScale(name="scale"),
                         layertype=VQC_Layer_Skolik,
-                        encoding_ops=encoding_ops_skolik,
-                        readout_op='pooling')
+                        encoding_ops=encoding_ops_skolik)
 
 target_model.set_weights(policy_model.get_weights())
 
@@ -53,3 +51,4 @@ acceptance_threshold = 196
 epsilon_start = 1.0
 epsilon_end = 0.01
 epsilon_duration = 20000
+

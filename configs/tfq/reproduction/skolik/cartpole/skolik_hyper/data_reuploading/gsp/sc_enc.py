@@ -3,7 +3,7 @@
 from TF.models_tfq.utils import encoding_ops_skolik
 from TF.models_tfq.vqc_layers import VQC_Layer_Skolik
 from TF.models_tfq.vqc_model import VQC_Model
-from wrappers import ContinousEncoding
+from wrappers import ScaledContEncodingCP
 
 import gym
 from tensorflow import keras
@@ -14,22 +14,24 @@ keras.backend.set_floatx('float32')
 
 ## Environment
 env = gym.make('CartPole-v0')
-env = ContinousEncoding(env)
+env = ScaledContEncodingCP(env)
 
 val_env = gym.make('CartPole-v0')
-val_env = ContinousEncoding(val_env)
+val_env = ScaledContEncodingCP(val_env)
 
 ## Model
 policy_model = VQC_Model(num_qubits=4, num_layers=5,
-                        scale=SingleScale(name="scale"),
+                        out_scale=SingleScale(name="scale"),
                         layertype=VQC_Layer_Skolik,
                         encoding_ops=encoding_ops_skolik,
-                        readout_op='pooling')
+                        readout_op='pooling',
+                        data_reuploading=True)
 target_model = VQC_Model(num_qubits=4, num_layers=5,
-                        scale=SingleScale(name="scale"),
+                        out_scale=SingleScale(name="scale"),
                         layertype=VQC_Layer_Skolik,
                         encoding_ops=encoding_ops_skolik,
-                        readout_op='pooling')
+                        readout_op='pooling',
+                        data_reuploading=True)
 
 target_model.set_weights(policy_model.get_weights())
 

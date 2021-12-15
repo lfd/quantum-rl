@@ -21,13 +21,13 @@ val_env = ContinousEncoding(val_env)
 
 ## Model
 policy_model = VQC_Model(num_qubits=4, num_layers=3,
-                    scale=SingleScale(name="scale"),
+                    out_scale=SingleScale(name="scale"),
                     layertype=VQC_Layer_Lockwood,
                     encoding_ops=encoding_ops_lockwood,
                     readout_op='pooling',
                     activation='sigmoid')
 target_model = VQC_Model(num_qubits=4, num_layers=3,
-                    scale=SingleScale(name="scale"),
+                    out_scale=SingleScale(name="scale"),
                     layertype=VQC_Layer_Lockwood,
                     encoding_ops=encoding_ops_lockwood,
                     readout_op='pooling',

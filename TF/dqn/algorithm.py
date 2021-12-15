@@ -11,8 +11,8 @@ class DQN:
 
     def __init__(self, env, val_env, policy_model, target_model, replay_capacity, 
         epsilon_duration, epsilon_start, epsilon_end, gamma, optimizer, loss,
-        optimizer_output = None, update_every_start = None, update_every_end = None, 
-        update_every_duration = None):
+        optimizer_input = None, optimizer_output = None, update_every_start = None, 
+        update_every_end = None, update_every_duration = None):
 
         self.env = env
         self.val_env = val_env
@@ -45,6 +45,7 @@ class DQN:
 
         self.gamma = gamma
         self.optimizer = optimizer
+        self.optimizer_input = optimizer_input
         self.optimizer_output = optimizer_output
         self.loss = loss
 
@@ -54,9 +55,6 @@ class DQN:
         update_every=None, on_transition=None, num_val_steps=None,
         num_val_trials=None, on_train=None, on_validate=None, 
         on_validation_step=None):
-
-        # counts validation epochs
-        epoch = 0
 
         sampler = Sampler(self.behavior_policy, self.env)
 
@@ -139,17 +137,36 @@ class DQN:
                 )
 
                 if self.optimizer_output:
-
-                    self.optimizer.apply_gradients(
-                        zip(grads[-1:], self.policy_model.trainable_variables[-1:])
-                    )
-                    self.optimizer_output.apply_gradients(
-                        zip(grads[:-1], self.policy_model.trainable_variables[:-1])
-                    )
+                    
+                    if self.optimizer_input:
+                        self.optimizer_input.apply_gradients(
+                            [(grads[1], self.policy_model.trainable_variables[1])]
+                        )
+                        self.optimizer.apply_gradients(
+                            [(grads[2], self.policy_model.trainable_variables[2])]
+                        )
+                        self.optimizer_output.apply_gradients(
+                            [(grads[0], self.policy_model.trainable_variables[0])]
+                        )
+                    else:
+                        self.optimizer.apply_gradients(
+                            [(grads[1], self.policy_model.trainable_variables[1])]
+                        )
+                        self.optimizer_output.apply_gradients(
+                            [(grads[0], self.policy_model.trainable_variables[0])]
+                        )
                 else:
-                    self.optimizer.apply_gradients(
-                        zip(grads, self.policy_model.trainable_variables)
-                    )
+                    if self.optimizer_input:
+                        self.optimizer_input.apply_gradients(
+                            [(grads[0], self.policy_model.trainable_variables[0])]
+                        )
+                        self.optimizer.apply_gradients(
+                            [(grads[1], self.policy_model.trainable_variables[1])]
+                        )
+                    else:
+                        self.optimizer.apply_gradients(
+                            zip(grads, self.policy_model.trainable_variables)
+                        )
 
                 if on_train:
                     on_train(
@@ -178,9 +195,6 @@ class DQN:
 
                 if on_validate:
                     on_validate(
-                        epoch=epoch, 
                         val_return=val_return,
                         grads=grads
                     )
-
-                epoch += 1

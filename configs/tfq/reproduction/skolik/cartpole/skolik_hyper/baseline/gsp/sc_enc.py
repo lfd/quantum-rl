@@ -20,14 +20,16 @@ val_env = gym.make('CartPole-v0')
 val_env = ScaledContEncodingCP(val_env)
 
 ## Model
-policy_model = VQC_Model(num_qubits=4, num_layers=5, 
-                        scale=SingleScale(name="scale"),
+policy_model = VQC_Model(num_qubits=4, num_layers=5,
+                        out_scale=SingleScale(name="scale"),
                         layertype=VQC_Layer_Skolik,
-                        encoding_ops=encoding_ops_skolik)
-target_model = VQC_Model(num_qubits=4, num_layers=5, 
-                        scale=SingleScale(name="scale"),
+                        encoding_ops=encoding_ops_skolik,
+                        readout_op='pooling')
+target_model = VQC_Model(num_qubits=4, num_layers=5,
+                        out_scale=SingleScale(name="scale"),
                         layertype=VQC_Layer_Skolik,
-                        encoding_ops=encoding_ops_skolik)
+                        encoding_ops=encoding_ops_skolik,
+                        readout_op='pooling')
 
 target_model.set_weights(policy_model.get_weights())
 
@@ -51,4 +53,3 @@ acceptance_threshold = 196
 epsilon_start = 1.0
 epsilon_end = 0.01
 epsilon_duration = 20000
-

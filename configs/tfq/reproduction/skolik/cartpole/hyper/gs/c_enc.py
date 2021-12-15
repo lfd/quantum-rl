@@ -21,11 +21,11 @@ val_env = ContinousEncoding(val_env)
 
 
 policy_model = VQC_Model(num_qubits=4, num_layers=5, 
-                    scale=SingleScale(name="scale"),
+                    out_scale=SingleScale(name="scale"),
                     layertype=VQC_Layer_Skolik,
                     encoding_ops=encoding_ops_skolik)
 target_model = VQC_Model(num_qubits=4, num_layers=5, 
-                    scale=SingleScale(name="scale"),
+                    out_scale=SingleScale(name="scale"),
                     layertype=VQC_Layer_Skolik,
                     encoding_ops=encoding_ops_skolik)
 

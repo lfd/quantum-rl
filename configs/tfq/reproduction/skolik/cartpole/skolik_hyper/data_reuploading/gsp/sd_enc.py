@@ -1,9 +1,9 @@
 # configs/cartpole-dnn.py
 
-from TF.models_tfq.utils import encoding_ops_lockwood
-from TF.models_tfq.vqc_layers import VQC_Layer_Lockwood
+from TF.models_tfq.utils import encoding_ops_skolik
+from TF.models_tfq.vqc_layers import VQC_Layer_Skolik
 from TF.models_tfq.vqc_model import VQC_Model
-from wrappers import ScaledContEncodingCP
+from wrappers import ScaledDirectionalEncodingCP
 
 import gym
 from tensorflow import keras
@@ -14,22 +14,24 @@ keras.backend.set_floatx('float32')
 
 ## Environment
 env = gym.make('CartPole-v0')
-env = ScaledContEncodingCP(env)
+env = ScaledDirectionalEncodingCP(env)
 
 val_env = gym.make('CartPole-v0')
-val_env = ScaledContEncodingCP(val_env)
+val_env = ScaledDirectionalEncodingCP(val_env)
 
 ## Model
-policy_model = VQC_Model(num_qubits=4, num_layers=3, 
+policy_model = VQC_Model(num_qubits=4, num_layers=5,
                         out_scale=SingleScale(name="scale"),
-                        layertype=VQC_Layer_Lockwood,
-                        encoding_ops=encoding_ops_lockwood,
-                        readout_op='pooling')
-target_model = VQC_Model(num_qubits=4, num_layers=3, 
+                        layertype=VQC_Layer_Skolik,
+                        encoding_ops=encoding_ops_skolik,
+                        readout_op='pooling',
+                        data_reuploading=True)
+target_model = VQC_Model(num_qubits=4, num_layers=5,
                         out_scale=SingleScale(name="scale"),
-                        layertype=VQC_Layer_Lockwood,
-                        encoding_ops=encoding_ops_lockwood,
-                        readout_op='pooling')
+                        layertype=VQC_Layer_Skolik,
+                        encoding_ops=encoding_ops_skolik,
+                        readout_op='pooling',
+                        data_reuploading=True)
 
 target_model.set_weights(policy_model.get_weights())
 

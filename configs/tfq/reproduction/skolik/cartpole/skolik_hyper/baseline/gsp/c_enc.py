@@ -7,7 +7,7 @@ from wrappers import ContinousEncoding
 
 import gym
 from tensorflow import keras
-from TF.models import Scale
+from TF.models import SingleScale
 
 # Setup Keras to use 32-bit floats
 keras.backend.set_floatx('float32')
@@ -20,14 +20,16 @@ val_env = gym.make('CartPole-v0')
 val_env = ContinousEncoding(val_env)
 
 ## Model
-policy_model = VQC_Model(num_qubits=4, num_layers=5, 
-                    scale=Scale(name='scale'),
-                    layertype=VQC_Layer_Skolik,
-                    encoding_ops=encoding_ops_skolik)
-target_model = VQC_Model(num_qubits=4, num_layers=5, 
-                    scale=Scale(name='scale'),
-                    layertype=VQC_Layer_Skolik,
-                    encoding_ops=encoding_ops_skolik)
+policy_model = VQC_Model(num_qubits=4, num_layers=5,
+                        out_scale=SingleScale(name="scale"),
+                        layertype=VQC_Layer_Skolik,
+                        encoding_ops=encoding_ops_skolik,
+                        readout_op='pooling')
+target_model = VQC_Model(num_qubits=4, num_layers=5,
+                        out_scale=SingleScale(name="scale"),
+                        layertype=VQC_Layer_Skolik,
+                        encoding_ops=encoding_ops_skolik,
+                        readout_op='pooling')
 
 target_model.set_weights(policy_model.get_weights())
 
@@ -51,4 +53,3 @@ acceptance_threshold = 196
 epsilon_start = 1.0
 epsilon_end = 0.01
 epsilon_duration = 20000
-
