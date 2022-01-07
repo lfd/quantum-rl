@@ -1,5 +1,7 @@
 #  Docker instructions
 
+# NOTE: the following information is outdated!
+
 ## Build docker image
 
 `docker build -t quantum-rl:nvidia-tf .`
