@@ -18,10 +18,8 @@ class DQN:
         self.env = env
         self.val_env = val_env
 
-        if torch.cuda.is_available():
-            self.device = torch.device('cuda')
-        else:
-            self.device = torch.device('cpu')
+        # TorchConnector only works with CPU
+        self.device = torch.device('cpu')
 
         self.policy_model = policy_model
         self.policy_model.to(self.device)

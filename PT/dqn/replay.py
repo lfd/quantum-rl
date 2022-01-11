@@ -69,7 +69,7 @@ class ReplayMemory:
             actions = torch.as_tensor(actions),
             rewards = torch.as_tensor(rewards).float(),
             is_terminal = torch.as_tensor(is_terminal),
-            next_states = torch.stack([s for s in next_states if s is not None]).float()
+            next_states = torch.stack([s for s in next_states if s is not None]).float().to(self.device)
         )
         
         return batch
