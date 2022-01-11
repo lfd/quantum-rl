@@ -1,21 +1,19 @@
 #  Docker instructions
 
-# NOTE: the following information is outdated!
-
 ## Build docker image
 
-`docker build -t quantum-rl:nvidia-tf .`
+`docker build -t quantum-rl .`
 
 ## Run docker container
 
-After building you can create a container using the image with:
+After building you can create a container with:
 
-`docker run --name tfq -it --runtime=nvidia --shm-size=1g --ulimit memlock=-1 --ulimit stack=67108864 quantum-rl:nvidia-tf`
+`docker run --name qrl -it --runtime=nvidia -v $PWD:/app quantum-rl`
 
-After exiting the container stops, but still exists.
+The container stops, when exiting.
 
 ## Access container
 
-To start the stopped container call:
+To restart the stopped container call:
 
-`docker start -i tfq`
+`docker start -i qrl`
