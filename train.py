@@ -10,7 +10,7 @@ if __name__ == '__main__':
 
     config_name = sys.argv[1]
 
-    experiment = f'logs/{config_name}_{datetime.now().strftime("%Y%m%d-%H%M%S")}'
+    experiment = f'logs/{config_name.replace(".", "_")}_{datetime.now().strftime("%Y%m%d-%H%M%S")}'
 
     if 'qiskit' in str(config_name):
         from torch.utils.tensorboard import SummaryWriter
