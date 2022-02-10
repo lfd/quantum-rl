@@ -1,0 +1,27 @@
+FROM tensorflow/tensorflow:2.4.1
+
+MAINTAINER Maja Franz <maja.franz@othr.de>
+
+# Add user
+RUN useradd -m -G sudo -s /bin/bash repro && echo "repro:repro" | chpasswd
+RUN usermod -a -G staff repro
+WORKDIR /home/repro
+
+# Add directory to home directory
+ADD --chown=repro:repro . /home/repro
+
+# install required packages
+RUN python -m pip install --upgrade pip
+RUN pip3 install -r requirements.txt
+
+# install R and R-packages for plotting
+ENV DEBIAN_FRONTEND=noninteractive
+RUN apt-get update && \
+    apt-get install r-base texlive-latex-base build-essential \
+        libcurl4-gnutls-dev libxml2-dev libssl-dev -y
+RUN R -e "install.packages('ggplot2')"
+RUN R -e "install.packages('tikzDevice')"
+RUN R -e "install.packages('devtools')"
+RUN R -e "devtools::install_version('ggh4x', '0.1.2.1')"
+
+USER repro
