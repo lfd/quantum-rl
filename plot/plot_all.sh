@@ -23,7 +23,7 @@ Rscript plot_xval_all.r data/xval_baseline/skolik_gsp_c/ xval_baseline_skolik_gs
 Rscript plot_xval_all.r data/xval_baseline/skolik_gsp_sc/ xval_baseline_skolik_gsp_sc pdf
 
 # Plot Figure 5 - Cross-Validation - Baseline with Data Re-uploading - best-performing
-Rscript plot_xval_best.r data/xval_baseline_data_reup/best/ xval_baseline_data_reup_best
+Rscript plot_xval_best.r data/xval_baseline_data_reup/best/ xval_baseline_data_reup_best pdf
 
 # Cross-Validation - Baseline with Data Re-uploading - all
 Rscript plot_xval_all.r data/xval_baseline_data_reup/lockwood_gs_c/ xval_baseline_data_reup_lockwood_gs_c pdf
