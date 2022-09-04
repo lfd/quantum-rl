@@ -11,17 +11,17 @@ WORKDIR /home/repro
 ADD --chown=repro:repro . /home/repro
 
 # install required packages
-RUN python -m pip install --upgrade pip
-RUN pip3 install -r requirements.txt
+#RUN python -m pip install --upgrade pip
+#RUN pip3 install -r requirements.txt
 
 # install R and R-packages for plotting
 ENV DEBIAN_FRONTEND=noninteractive
 RUN apt-get update && \
-    apt-get install r-base texlive-latex-base build-essential \
-        libcurl4-gnutls-dev libxml2-dev libssl-dev -y
+    apt-get install r-base texlive-latex-base \
+    r-cran-devtools -y
+
 RUN R -e "install.packages('ggplot2')"
 RUN R -e "install.packages('tikzDevice')"
-RUN R -e "install.packages('devtools')"
-RUN R -e "devtools::install_github('teunbrand/ggh4x')"
+RUN R -e "install.packages('ggh4x')"
 
 USER repro
