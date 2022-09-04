@@ -1,6 +1,10 @@
 # Deep Reinforcement Learning with Variational Quantum Circuits
 
-Code accompanying the paper: "Uncovering Instabilities in Variational-Quantum Deep Q-Networks", currently under review in the "Journal of The Franklin Institute"
+Code accompanying the paper: 
+
+**Uncovering Instabilities in Variational-Quantum Deep Q-Networks**.
+Maja Franz, Lucas Wolf, Maniraman Periyasamy, Christian Ufrecht, Daniel D. Scherer, Axel Plinge, Christopher Mutschler, Wolfgang Mauerer.
+Journal of The Franklin Institute. Elsevier (Open Access). 2022.
 
 ## Training
 
